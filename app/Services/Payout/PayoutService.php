@@ -2,11 +2,13 @@
 
 namespace App\Services\Payout;
 
+use App\Services\Config;
 use Illuminate\Support\Facades\Http;
 use App\Models\Transaction;
+use Throwable;
 
 
-class Service
+class PayoutService extends Config
 {
 
     public function store(array $data): object
@@ -35,10 +37,8 @@ class Service
         return $response;
     }
 
-    public function requestTransactionPayout(object $transaction)
+    public function requestTransactionPayout(object $transaction): ?object
     {
-
-
         $body = [
             'amount' => $transaction['amount'],
             'currency' => $transaction['currency'],
@@ -50,13 +50,17 @@ class Service
                 'payment_description' => 'payment_description'
             ]
         ];
-        $url = "https://aliumpay.com/api/deduce/create";
-
         $request = json_encode($body);
-
         $sign = md5($request . $_ENV["SECRET_KEY"]);
-
-        return Http::withoutVerifying()->withHeaders(['auth' => $_ENV['API_KEY'], 'sign' => $sign])->asJson()->post($url, $body);
+        try {
+            $response = Http::withoutVerifying()->withHeaders(['auth' => $_ENV['API_KEY'], 'sign' => $sign])->asJson()->post($this->getConfig('deduce_create_url'), $body);
+        } catch (Throwable $exception) {
+            $response = $exception;
+        }
+        if ($response instanceof Throwable) {
+            return null;
+        }
+        return $response;
     }
 
     public function updateErrorTransaction(object $transaction, array $response): object
