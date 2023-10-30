@@ -88,10 +88,6 @@
             </div>
 
 
-
-
-
-
             <button type="submit" class="btn btn-primary">Create payment</button>
         </form>
     </div>
