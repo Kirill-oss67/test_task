@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 
 
 class PayoutController extends Controller
-{   
+{
     public function __invoke()
     {
         return view('payout.index');
     }
-    
+
 }
